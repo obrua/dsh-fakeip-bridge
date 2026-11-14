@@ -1,5 +1,5 @@
 /**
- * fakeip-bridge — pure host-side logic and the `ctx.web` provider patch.
+ * dsh-fakeip-bridge — pure host-side logic and the `ctx.web` provider patch.
  *
  * Clash TUN (fake-ip) takes over system DNS: every hostname resolves to a
  * reserved fake address (e.g. 198.18.0.0/15, 2001:2::/48). DSH's local
@@ -99,7 +99,7 @@ export function normalizeOptions(config) {
 	return {
 		allowed: buildMatcher(ipv4Ranges, ipv6Ranges),
 		logLine: (...args) => {
-			if (log) console.warn('[fakeip-bridge]', ...args);
+			if (log) console.warn('[dsh-fakeip-bridge]', ...args);
 		},
 	};
 }
@@ -231,5 +231,5 @@ export function apply(ctx, config) {
 			for (const provider of state.patched) restoreProvider(provider);
 			state.patched.clear();
 		};
-	}, 'fakeip-bridge.patch-fetch-providers');
+	}, 'dsh-fakeip-bridge.patch-fetch-providers');
 }

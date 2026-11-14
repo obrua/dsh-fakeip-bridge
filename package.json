@@ -1,6 +1,6 @@
 {
   "name": "dsh-fakeip-bridge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Restore DSH web_fetch under a Clash/TUN fake-IP setup while keeping the loopback/private-network SSRF guard. Configurable from the Plugins page.",
   "license": "MIT",

@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] - 2026-11-14
+
+### Changed
+
+- Renamed the plugin row id and the local project directory to `dsh-fakeip-bridge`, matching the package and repository names.
+
+### Notes
+
+- DSH Desktop `2.0.23-next` (`@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3`) reworked the local fetch provider to allow intranet and local addresses and removed `resolveAddresses`. The bridge is inert there and no longer needed; the README now documents the version matrix.
+
 ## [0.2.0] - 2026-11-12
 
 ### Added

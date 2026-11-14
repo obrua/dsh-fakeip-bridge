@@ -20,7 +20,7 @@ window.__ModuleLoader__.load({
 		/** Locale namespace owned by this client plugin. */
 		const NS = 'fakeipBridge';
 		/** Host entry id of the row whose config this page edits. */
-		const ENTRY_ID = 'fakeip-bridge';
+		const ENTRY_ID = 'dsh-fakeip-bridge';
 		/** Key of the bundle whose page renders this form. */
 		const BUNDLE_KEY = 'dsh-fakeip-bridge';
 
@@ -239,9 +239,9 @@ window.__ModuleLoader__.load({
 			const disable = !editable || busy;
 			return h('form', { onSubmit: submit, style: { display: 'grid', gap: 14 } },
 				h('div', { style: fieldStyle },
-					h('label', { htmlFor: 'fakeip-bridge-ipv4', style: labelStyle }, t('ipv4Label')),
+					h('label', { htmlFor: 'dsh-fakeip-bridge-ipv4', style: labelStyle }, t('ipv4Label')),
 					h('textarea', {
-						id: 'fakeip-bridge-ipv4',
+						id: 'dsh-fakeip-bridge-ipv4',
 						value: current.ipv4,
 						disabled: disable,
 						rows: 3,
@@ -253,9 +253,9 @@ window.__ModuleLoader__.load({
 					h('p', { style: hintStyle }, t('ipv4Hint')),
 				),
 				h('div', { style: fieldStyle },
-					h('label', { htmlFor: 'fakeip-bridge-ipv6', style: labelStyle }, t('ipv6Label')),
+					h('label', { htmlFor: 'dsh-fakeip-bridge-ipv6', style: labelStyle }, t('ipv6Label')),
 					h('textarea', {
-						id: 'fakeip-bridge-ipv6',
+						id: 'dsh-fakeip-bridge-ipv6',
 						value: current.ipv6,
 						disabled: disable,
 						rows: 3,
@@ -295,7 +295,7 @@ window.__ModuleLoader__.load({
 
 		/** Mount the locale dictionary and the bundle configuration form. */
 		function apply(ctx) {
-			ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'fakeip-bridge: dictionaries');
+			ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-fakeip-bridge: dictionaries');
 			const t = ctx.locale.bind(NS);
 			const controller = ctx.configForms.get(ENTRY_ID);
 			ctx.effect(() => ctx.configForms.whileServed([ENTRY_ID], () => ctx.slots.inject('plugins.bundle.config', () => ctx.slots.register({
@@ -303,7 +303,7 @@ window.__ModuleLoader__.load({
 				key: BUNDLE_KEY,
 				locale: NS,
 				inject: () => ({ controller, t }),
-			}, ConfigPage))), 'fakeip-bridge: bundle configuration page');
+			}, ConfigPage))), 'dsh-fakeip-bridge: bundle configuration page');
 		}
 
 		return { inject: ['slots', 'locale', 'configForms'], apply };

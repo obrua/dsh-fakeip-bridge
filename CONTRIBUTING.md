@@ -23,7 +23,7 @@ To try the plugin inside DSH, install the checkout directory from **Plugins → 
 - `fakeip.js` — pure logic. Keep it free of package imports so it remains testable with plain Node.
 - `index.js` — Host entry and the `Config` schema. It only declares the schema and mounts `fakeip.js`.
 - `client.js` — hand-authored browser module (module-loader format) for the configuration page.
-- `cordis.patch.yml` — bundle patch that inserts the `fakeip-bridge` row and its default config.
+- `cordis.patch.yml` — bundle patch that inserts the `dsh-fakeip-bridge` row and its default config.
 - `test/fakeip.test.mjs` — node:test unit tests.
 
 ## Compatibility contract
@@ -34,7 +34,7 @@ The plugin intentionally depends on DSH internals:
 - `HttpFetchProvider` (`@deepseek-ai/dsh-web-fetch-http`) exposes `resolveAddresses(hostname, signal)`;
 - the local provider rejects non-public answers with `WEB_BLOCKED_URL`.
 
-These were verified against DSH `0.2.1-rc.4`. When updating for a new DSH version, update the tested version in the README and CHANGELOG and re-run the smoke checks (`web_fetch https://github.com` succeeds, `web_fetch http://127.0.0.1:<port>` still fails).
+These were verified against DSH `0.2.1-rc.4`. In `@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` (Desktop `2.0.23-next`) the local provider allows intranet and local addresses and no longer exposes `resolveAddresses`; the plugin is inert there. When updating for a new DSH version, update the tested version in the README and CHANGELOG and re-run the smoke checks.
 
 ## Pull requests
 

@@ -4,7 +4,7 @@
 # returned by the system resolver; adjust them if the proxy's fake-ip range
 # changes (or edit them from the Plugins page).
 - insert:
-    - id: fakeip-bridge
+    - id: dsh-fakeip-bridge
       name: dsh-fakeip-bridge
       config:
         ipv4Ranges: ['198.18.0.0/15']

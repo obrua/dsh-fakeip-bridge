@@ -5,7 +5,7 @@
 
 [English](README.md) | 简体中文
 
-一个非官方的 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件：在 **Clash / TUN fake-IP** 环境下恢复本地 `web_fetch`，同时**保留** DSH 对 loopback / 内网的 SSRF 拦截。
+一个非官方的 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件：在 DSH 仍会拒绝非公网解析结果的版本上，于 **Clash / TUN fake-IP** 环境下恢复本地 `web_fetch`，同时**不削弱** DSH 自身的 SSRF 拦截。新版 DSH 已原生支持这种场景，请先看上方「状态与兼容性」。
 
 > 本项目与 DeepSeek 官方无关；"DeepSeek Harness" 等相关名称归其各自所有者。
 
@@ -30,9 +30,16 @@ Error: URL hostname "github.com" resolves to a non-public IP address   (WEB_BLOC
 
 放行后的地址集会交回 provider，由它继续做地址钉扎。插件不会修改 Clash 配置、TUN、系统 DNS 或 `/etc/hosts`。
 
+## 状态与兼容性
+
+| DSH 版本 | 本地 `web_fetch` 行为 | 本插件 |
+|---|---|---|
+| Desktop `2.0.21-next`、`@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4` | 对非公网解析结果抛 `WEB_BLOCKED_URL`。 | **需要。** 解析结果全部落在配置 fake-IP 段内的主机名会被重新解析并放行。 |
+| Desktop `2.0.23-next`、`@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` 及以后 | 本地 provider 改为允许访问内网和本机地址，且不再暴露 `resolveAddresses`。 | **不需要，保持 inert。** `web_fetch` 原生就能访问 fake-IP 目标，DSH 本身也不再拦截 loopback/内网。 |
+
 ## 环境要求
 
-- DSH Desktop **2.0.21-next**，DSH 包版本 **0.2.1-rc.4**（已验证的契约，见[兼容性](#兼容性)）
+- 本地抓取 provider 仍会以 `WEB_BLOCKED_URL` 拒绝非公网 DNS 解析结果的 DSH 版本（已验证 Desktop **2.0.21-next** / DSH 包 **0.2.1-rc.4**）
 - Node.js **>= 22.19**
 - 使用 fake-IP DNS 的 TUN 代理（默认值对应 Clash Verge Rev：`198.18.0.0/15`、`2001:2::/48`、`fdfe:dcba:9876::/64`）
 
@@ -71,7 +78,7 @@ Plugins → Add plugin → /absolute/path/to/dsh-fakeip-bridge
 配置页会拒绝空值/非法网段。也可以直接在 profile 的 `cordis.patch.yml` 里维护同样的 row config：
 
 ```yaml
-- id: fakeip-bridge
+- id: dsh-fakeip-bridge
   name: dsh-fakeip-bridge
   config:
     ipv4Ranges: ['198.18.0.0/15']
@@ -89,7 +96,7 @@ Plugins → Add plugin → /absolute/path/to/dsh-fakeip-bridge
 | `web_fetch https://example.com` | HTTP 200 |
 | `web_fetch http://127.0.0.1:<任意端口>` | 仍被拒绝：`URL hostname "127.0.0.1" resolves to a non-public IP address` |
 
-最后一条正是重点：loopback / 内网防护仍然有效。
+最后一条正是重点（在桥接生效的版本上）：loopback / 内网防护仍然有效。在插件 inert 的 DSH 版本上（见上方「状态与兼容性」），`web_fetch` 原生即可通过 fake-IP 工作，且 DSH 本身已不再拦截 loopback/内网——这是 DSH 上游的变化，不是本插件造成的。
 
 ## 安全模型
 
@@ -98,6 +105,7 @@ Plugins → Add plugin → /absolute/path/to/dsh-fakeip-bridge
 - **没有额外网络面**：插件没有服务、端口或自己的外发请求，只在 Host 进程内包装现有 provider。
 - **不改系统配置**：不修改 Clash、TUN、DNS 或 `/etc/hosts`。
 - **无关场景保持 inert**：如果用户切到其他 fetch provider（例如 DeepSeek API provider），或 provider 走了代理路径（`proxyRouteFor`），插件不生效也不报错。
+- **版本相关**：在本地 provider 不再强制公网地址检查的 DSH 版本（`0.2.2-rc.3` 及以后），插件保持 inert，也无法恢复该拦截；这是 DSH 上游的策略变化。
 
 ## 兼容性
 
@@ -107,7 +115,7 @@ Plugins → Add plugin → /absolute/path/to/dsh-fakeip-bridge
 - `@deepseek-ai/dsh-web`、`@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4`
 - Node.js `24.21.0`（Host 运行时）
 
-DSH 把这些视为内部实现，升级后可能失效。升级 DSH 后请重新跑单测和上面的冒烟验证。若运行时结构不符，插件会降级为 inert，而不是抛错。
+DSH 把这些视为内部实现。在 `@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3`（Desktop `2.0.23-next`）中，本地 provider 改为允许访问内网和本机地址，`resolveAddresses` 已不存在：插件在该版本保持 inert，也不再需要。对于仍暴露该 resolver 的版本，若运行时结构不符，插件会降级为 inert 而不是抛错。升级 DSH 后请重新跑单测和冒烟验证。
 
 ## 开发
 
@@ -126,7 +134,7 @@ npm run check
 | `index.js` | Host 入口：导出 volatile `Config` schema 并挂载 patch |
 | `fakeip.js` | 纯逻辑：网段解析/匹配、guarded resolver、provider 包装 |
 | `client.js` | 浏览器端：Plugins 页 bundle 配置表单（`plugins.bundle.config`） |
-| `cordis.patch.yml` | Bundle patch，插入 `fakeip-bridge` 行并带默认配置 |
+| `cordis.patch.yml` | Bundle patch，插入 `dsh-fakeip-bridge` 行并带默认配置 |
 | `locale/en.json`、`locale/zh.json`、`icon.svg` | 插件显示资源 |
 | `test/fakeip.test.mjs` | 桥接行为的单元测试 |
 
@@ -135,6 +143,7 @@ npm run check
 ## 已知限制
 
 - 只包装本地 `http` fetch provider。
+- 需要 DSH 仍提供公网地址 resolver；DSH `0.2.2-rc.3` 及以后本地 provider 不再强制该检查。
 - 如果 DSH 在该插件的浏览器端代码出现之前就已缓存了这个包（例如开发过程中），配置表单要重启一次 DSH 后才会出现；正常安装会直接出现。
 - 插件必须从稳定目录安装；移动 `link:` 安装目录会导致失效。
 - 未对 IPv4-mapped IPv6 / NAT64 做特殊放行：只接受与配置网段精确匹配的地址，保持 provider 自身的 fail-closed 行为。

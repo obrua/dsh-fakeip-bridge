@@ -1,5 +1,5 @@
 /**
- * fakeip-bridge — host half.
+ * dsh-fakeip-bridge — host half.
  *
  * Declares the editable row config (fake-IP ranges and logging) and mounts the
  * provider patch implemented in ./fakeip.js. The three fields are volatile:
@@ -12,7 +12,7 @@ import z from '@deepseek-ai/schemastery';
 import { DEFAULT_IPV4_RANGES, DEFAULT_IPV6_RANGES, apply as applyBridge } from './fakeip.js';
 
 /** Cordis plugin name used by loader diagnostics. */
-export const name = 'fakeip-bridge';
+export const name = 'dsh-fakeip-bridge';
 /** The web seam whose local fetch provider this plugin instruments. */
 export const inject = ['web'];
 

@@ -5,7 +5,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-An unofficial plugin for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) that restores the local `web_fetch` capability under a **Clash / TUN fake-IP** DNS setup — without weakening DSH's SSRF guard for loopback and private networks.
+An unofficial plugin for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) that restored the local `web_fetch` capability under a **Clash / TUN fake-IP** DNS setup on DSH versions whose fetch provider rejects non-public addresses — without weakening DSH's own SSRF guard. Newer DSH releases handle this natively, so check [Status and compatibility](#status-and-compatibility) first.
 
 > Not affiliated with DeepSeek. "DeepSeek Harness" and related marks belong to their respective owners.
 
@@ -30,9 +30,16 @@ It wraps the local `http` fetch provider's `resolveAddresses` method with a narr
 
 The accepted address set is then handed back to the original provider, which still pins the connection to those addresses. Clash configuration, TUN, system DNS and `/etc/hosts` are never touched.
 
+## Status and compatibility
+
+| DSH version | Local `web_fetch` behaviour | This plugin |
+|---|---|---|
+| Desktop `2.0.21-next`, `@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4` | Rejects non-public resolved addresses with `WEB_BLOCKED_URL`. | **Needed.** Hostnames whose answers are inside the configured fake-IP ranges are re-resolved and allowed. |
+| Desktop `2.0.23-next`, `@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` and later | The local provider now allows intranet and local addresses by design and no longer exposes `resolveAddresses`. | **Not needed, stays inert.** `web_fetch` reaches fake-IP destinations natively, and DSH itself no longer rejects loopback/private destinations. |
+
 ## Requirements
 
-- DSH Desktop **2.0.21-next** with DSH packages **0.2.1-rc.4** (the tested contract; see [Compatibility](#compatibility))
+- A DSH version whose local fetch provider still rejects non-public DNS answers with `WEB_BLOCKED_URL` (verified on Desktop **2.0.21-next** with DSH packages **0.2.1-rc.4**)
 - Node.js **>= 22.19**
 - A TUN proxy configured with fake-IP DNS (defaults match Clash Verge Rev: `198.18.0.0/15`, `2001:2::/48`, `fdfe:dcba:9876::/64`)
 
@@ -71,7 +78,7 @@ The plugin is installed as a `link:` dependency. Do not move or delete the direc
 Invalid or empty ranges are rejected by the configuration page. As a fallback, the same row config can live in the profile's `cordis.patch.yml`:
 
 ```yaml
-- id: fakeip-bridge
+- id: dsh-fakeip-bridge
   name: dsh-fakeip-bridge
   config:
     ipv4Ranges: ['198.18.0.0/15']
@@ -89,7 +96,7 @@ Once installed, these calls exercise the bridge:
 | `web_fetch https://example.com` | HTTP 200 |
 | `web_fetch http://127.0.0.1:<any port>` | still rejected: `URL hostname "127.0.0.1" resolves to a non-public IP address` |
 
-The last row is the point: loopback and private-network protection stays active.
+The last row is the point on versions where the bridge is active: loopback and private-network protection stays active. On DSH versions where the plugin is inert (see [Status and compatibility](#status-and-compatibility)), `web_fetch` works natively through fake-IP DNS, and loopback/private destinations are no longer rejected by DSH itself — a DSH change, not this plugin.
 
 ## Security model
 
@@ -98,6 +105,7 @@ The last row is the point: loopback and private-network protection stays active.
 - **No network surface.** The plugin has no server, no listener, and no outbound requests of its own; it only instruments the existing fetch provider inside the Host process.
 - **No system changes.** It does not modify Clash, TUN, DNS, or `/etc/hosts`.
 - **Inert when irrelevant.** If another fetch provider is selected (e.g. the DeepSeek API provider), or the provider takes its proxy route (`proxyRouteFor`), the bridge is a no-op.
+- **Version-dependent.** On DSH versions whose local provider no longer enforces the public-address check (`0.2.2-rc.3` and later), this plugin stays inert and cannot restore that guard; that policy change comes from DSH.
 
 ## Compatibility
 
@@ -107,7 +115,7 @@ The bridge depends on an internal field of `@deepseek-ai/dsh-web-fetch-http`'s `
 - `@deepseek-ai/dsh-web`, `@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4`
 - Node.js `24.21.0` (Host runtime)
 
-DSH treats these as private implementation details, so a DSH upgrade may break the bridge. Re-run the unit tests and the smoke checks above after upgrading. If the internal shape is missing, the plugin degrades to inert instead of throwing.
+DSH treats these as private implementation details. In `@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` (Desktop `2.0.23-next`) the local provider was reworked to allow intranet and local addresses, and `resolveAddresses` is gone: the plugin stays inert and is unnecessary there. On versions that still expose the resolver the plugin degrades to inert rather than throwing when the internal shape is missing. Re-run the unit tests and smoke checks after a DSH upgrade.
 
 ## Development
 
@@ -126,7 +134,7 @@ Repository layout:
 | `index.js` | Host entry: exports the volatile `Config` schema and mounts the patch |
 | `fakeip.js` | Pure logic: range parsing/matching, guarded resolver, provider instrumentation |
 | `client.js` | Browser half: the Plugins-page bundle configuration form (`plugins.bundle.config`) |
-| `cordis.patch.yml` | Bundle patch inserting the `fakeip-bridge` row with default config |
+| `cordis.patch.yml` | Bundle patch inserting the `dsh-fakeip-bridge` row with default config |
 | `locale/en.json`, `locale/zh.json`, `icon.svg` | Plugin display resources |
 | `test/fakeip.test.mjs` | Unit tests for the bridge behavior |
 
@@ -135,6 +143,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 ## Limitations
 
 - Only the local `http` fetch provider is instrumented.
+- Requires a DSH version with the public-address resolver; DSH `0.2.2-rc.3` and later no longer enforce it for the local provider.
 - If DSH cached this package before its browser half existed (for example while developing the plugin), the configuration form appears only after one DSH restart. For a normal install it shows up immediately.
 - The plugin must be installed from a stable directory; moving a `link:` install breaks it.
 - IPv4-mapped IPv6 and NAT64 translations are not special-cased: the bridge only accepts the exact addresses returned for the configured range list, matching the provider's own fail-closed validation.
