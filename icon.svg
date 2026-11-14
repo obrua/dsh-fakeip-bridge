@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fake-IP Bridge">
+  <rect width="64" height="64" rx="14" fill="#1f6feb"/>
+  <path d="M10 42h44" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M16 42c0-10 7-18 16-18s16 8 16 18" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="21" cy="31" r="4" fill="#8ecbff"/>
+  <circle cx="43" cy="31" r="4" fill="#8ecbff"/>
+  <text x="32" y="56" font-family="system-ui, sans-serif" font-size="9" fill="#ffffff" text-anchor="middle">fake-ip</text>
+</svg>

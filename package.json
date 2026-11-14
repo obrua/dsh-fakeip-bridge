@@ -1,0 +1,67 @@
+{
+  "name": "dsh-fakeip-bridge",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Restore DSH web_fetch under a Clash/TUN fake-IP setup while keeping the loopback/private-network SSRF guard. Configurable from the Plugins page.",
+  "license": "MIT",
+  "author": "obrua",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "fake-ip",
+    "clash",
+    "tun",
+    "web-fetch",
+    "ssrf"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/obrua/dsh-fakeip-bridge.git"
+  },
+  "homepage": "https://github.com/obrua/dsh-fakeip-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/obrua/dsh-fakeip-bridge/issues"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "fakeip.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.zh-CN.md"
+  ],
+  "scripts": {
+    "test": "node --test test/fakeip.test.mjs",
+    "check": "node --check index.js && node --check fakeip.js && node --check client.js && node --test test/fakeip.test.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "~3.18.5"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-plugin-manager"
+      ]
+    }
+  }
+}

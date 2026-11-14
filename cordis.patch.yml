@@ -1,0 +1,12 @@
+# Bundle patch layer for dsh-fakeip-bridge.
+# The row mounts the host half; the package's Client half adds the configuration
+# page on the Plugins page. The ranges are Clash TUN fake-IP ranges that may be
+# returned by the system resolver; adjust them if the proxy's fake-ip range
+# changes (or edit them from the Plugins page).
+- insert:
+    - id: fakeip-bridge
+      name: dsh-fakeip-bridge
+      config:
+        ipv4Ranges: ['198.18.0.0/15']
+        ipv6Ranges: ['2001:2::/48', 'fdfe:dcba:9876::/64']
+        log: false

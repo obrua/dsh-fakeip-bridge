@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Fake-IP 桥接",
+    "description": "在 TUN fake-IP 代理下恢复 web_fetch，同时保留对 loopback/内网的 SSRF 拦截；可在「插件」页直接配置放行的 fake-IP 网段。"
+  }
+}

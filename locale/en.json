@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Fake-IP Bridge",
+    "description": "Restores web_fetch under a TUN fake-IP proxy while keeping the loopback/private-network SSRF guard. Configure the allowed fake-IP ranges on the Plugins page."
+  }
+}
