@@ -28,6 +28,8 @@ To try the plugin inside DSH, install the checkout directory from **Plugins → 
 
 ## Compatibility contract
 
+**DSH `0.2.2-rc.3`+ note:** the local fetch provider now allows intranet and local addresses and exposes no `resolveAddresses`; the plugin is inert there. The contract below applies only to older DSH versions that still expose the resolver.
+
 The plugin intentionally depends on DSH internals:
 
 - `ctx.web` (`@deepseek-ai/dsh-web`) exposes `fetchProviders` and `registerFetchProvider`;

@@ -10,7 +10,7 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Notes
 
-- DSH Desktop `2.0.23-next` (`@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3`) reworked the local fetch provider to allow intranet and local addresses and removed `resolveAddresses`. The bridge is inert there and no longer needed; the README now documents the version matrix.
+- **Important:** DSH Desktop `2.0.23-next` (`@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3`) reworked the local fetch provider to allow intranet and local addresses and removed `resolveAddresses`. The bridge is inert there and no longer needed; the README now documents the version matrix.
 
 ## [0.2.0] - 2026-11-12
 

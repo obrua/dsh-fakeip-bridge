@@ -5,13 +5,18 @@
 
 English | [简体中文](README.zh-CN.md)
 
-An unofficial plugin for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) that restored the local `web_fetch` capability under a **Clash / TUN fake-IP** DNS setup on DSH versions whose fetch provider rejects non-public addresses — without weakening DSH's own SSRF guard. Newer DSH releases handle this natively, so check [Status and compatibility](#status-and-compatibility) first.
+> [!WARNING]
+> **DSH `0.2.2-rc.3` (Desktop `2.0.23-next`) and later changed the local fetch provider.** It now allows intranet and local addresses by design and no longer exposes `resolveAddresses`, so **this plugin is inert on those versions and is not needed**. `web_fetch` reaches fake-IP destinations natively there — but DSH also no longer rejects loopback/private destinations itself, and this plugin cannot restore that upstream change.
+>
+> Use this plugin only when your DSH version still rejects non-public addresses (verified: Desktop `2.0.21-next` / `@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4`). Details are in [Status and compatibility](#status-and-compatibility) below.
+
+An unofficial plugin for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) that restored the local `web_fetch` capability under a **Clash / TUN fake-IP** DNS setup on DSH versions whose fetch provider rejects non-public addresses — without weakening DSH's own SSRF guard. Newer DSH releases (`0.2.2-rc.3` and later) handle this natively — see the warning above and [Status and compatibility](#status-and-compatibility).
 
 > Not affiliated with DeepSeek. "DeepSeek Harness" and related marks belong to their respective owners.
 
 ## The problem
 
-DSH's local web fetch provider (`@deepseek-ai/dsh-web-fetch-http`) resolves a URL hostname and refuses every address that is not public unicast:
+On DSH versions before `0.2.2-rc.3`, the local web fetch provider (`@deepseek-ai/dsh-web-fetch-http`) resolves a URL hostname and refuses every address that is not public unicast:
 
 ```
 Error: URL hostname "github.com" resolves to a non-public IP address   (WEB_BLOCKED_URL)
@@ -35,7 +40,7 @@ The accepted address set is then handed back to the original provider, which sti
 | DSH version | Local `web_fetch` behaviour | This plugin |
 |---|---|---|
 | Desktop `2.0.21-next`, `@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4` | Rejects non-public resolved addresses with `WEB_BLOCKED_URL`. | **Needed.** Hostnames whose answers are inside the configured fake-IP ranges are re-resolved and allowed. |
-| Desktop `2.0.23-next`, `@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` and later | The local provider now allows intranet and local addresses by design and no longer exposes `resolveAddresses`. | **Not needed, stays inert.** `web_fetch` reaches fake-IP destinations natively, and DSH itself no longer rejects loopback/private destinations. |
+| Desktop `2.0.23-next`, `@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` and later | **⚠️ Upstream change:** the local provider allows intranet and local addresses by design and no longer exposes `resolveAddresses`. | **⚠️ Not needed, stays inert.** `web_fetch` reaches fake-IP destinations natively, and DSH itself no longer rejects loopback/private destinations. |
 
 ## Requirements
 

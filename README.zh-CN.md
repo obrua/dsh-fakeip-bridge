@@ -5,13 +5,18 @@
 
 [English](README.md) | 简体中文
 
-一个非官方的 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件：在 DSH 仍会拒绝非公网解析结果的版本上，于 **Clash / TUN fake-IP** 环境下恢复本地 `web_fetch`，同时**不削弱** DSH 自身的 SSRF 拦截。新版 DSH 已原生支持这种场景，请先看上方「状态与兼容性」。
+> [!WARNING]
+> **DSH `0.2.2-rc.3`（Desktop `2.0.23-next`）及以后版本改了本地 fetch provider：** 现在按设计允许访问内网和本机地址，并且不再暴露 `resolveAddresses`，因此**本插件在这些版本上保持 inert、不再需要**。`web_fetch` 原生就能访问 fake-IP 目标——但 DSH 本身也不再拦截 loopback/内网，本插件无法恢复这个上游变化。
+>
+> 仅当你的 DSH 版本仍会拒绝非公网地址时才需要本插件（已验证：Desktop `2.0.21-next` / `@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4`）。详情见下方「状态与兼容性」。
+
+一个非官方的 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件：在 DSH 仍会拒绝非公网解析结果的版本上，于 **Clash / TUN fake-IP** 环境下恢复本地 `web_fetch`，同时**不削弱** DSH 自身的 SSRF 拦截。新版 DSH（`0.2.2-rc.3` 及以后）已原生支持这种场景——见上方警告和下方「状态与兼容性」。
 
 > 本项目与 DeepSeek 官方无关；"DeepSeek Harness" 等相关名称归其各自所有者。
 
 ## 问题背景
 
-DSH 本地抓取 provider（`@deepseek-ai/dsh-web-fetch-http`）会先解析 URL 主机名，并拒绝一切不是公网单播的解析结果：
+在 DSH `0.2.2-rc.3` 之前，本地抓取 provider（`@deepseek-ai/dsh-web-fetch-http`）会先解析 URL 主机名，并拒绝一切不是公网单播的解析结果：
 
 ```
 Error: URL hostname "github.com" resolves to a non-public IP address   (WEB_BLOCKED_URL)
@@ -35,7 +40,7 @@ Error: URL hostname "github.com" resolves to a non-public IP address   (WEB_BLOC
 | DSH 版本 | 本地 `web_fetch` 行为 | 本插件 |
 |---|---|---|
 | Desktop `2.0.21-next`、`@deepseek-ai/dsh-web-fetch-http` `0.2.1-rc.4` | 对非公网解析结果抛 `WEB_BLOCKED_URL`。 | **需要。** 解析结果全部落在配置 fake-IP 段内的主机名会被重新解析并放行。 |
-| Desktop `2.0.23-next`、`@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` 及以后 | 本地 provider 改为允许访问内网和本机地址，且不再暴露 `resolveAddresses`。 | **不需要，保持 inert。** `web_fetch` 原生就能访问 fake-IP 目标，DSH 本身也不再拦截 loopback/内网。 |
+| Desktop `2.0.23-next`、`@deepseek-ai/dsh-web-fetch-http` `0.2.2-rc.3` 及以后 | **⚠️ 上游变化：** 本地 provider 改为允许访问内网和本机地址，且不再暴露 `resolveAddresses`。 | **⚠️ 不需要，保持 inert。** `web_fetch` 原生就能访问 fake-IP 目标，DSH 本身也不再拦截 loopback/内网。 |
 
 ## 环境要求
 
